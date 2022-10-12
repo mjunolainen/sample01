@@ -1,0 +1,12 @@
+{
+  "messages": [
+    {
+      "type": "suggestion",
+      "content": "This is a no reply number, contact +12345 instead."
+    },
+    {
+      "type": "end_engagement"
+    }
+  ],
+  "confidence_level": 0.99
+}
