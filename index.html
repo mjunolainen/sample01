@@ -7,7 +7,38 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Form</title>
     <link rel="stylesheet" href="styles.css">
-	<script async src="https://api.glia.com/salemove_integration.js"></script>
+//	<script async src="https://api.glia.com/salemove_integration.js"></script>
+	//START ECU TESTING SCRIPT
+	<script async="" src="https://api.glia.com/salemove_integration.js" onload="initGlia()"></script>
+<script>
+		function initGlia() {
+			sm.getApi({version: 'v1'})
+			.then(function(glia) {
+				glia.updateInformation({
+					"name": " ",
+					"phone":" ",
+					"email":" ",
+					"customAttributes":{
+						"displayName":" ",
+						"flavor": " "
+					},
+					"externalId": " " // ExternalId can't be 5 chars long
+				})
+				.then(function() {
+					console.log("Successfully to cleared visitor attributes");
+				})
+				.catch(function(error) {
+					console.log("Failed to clear attributes for visitor");
+					console.log('error: ', error);
+				});
+				if ( document.getElementById('site_body').classList.contains('translatepress-es_ES') ) {
+					glia.setLocale('es-MX');
+				}
+			});
+		}
+	</script>
+	// END ECU TESTING SCRIPT
+	
 </head>
 <body>
 
