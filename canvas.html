@@ -40,6 +40,70 @@
 
       ctx.drawImage(img, x, y, newWidth, newHeight);
     };
+//Glia test script 
+    sm.getApi({version: "v1"}).then(function(glia) {
+  var imgReplacementMarker = "glia-canvas-mirror-image";
+
+  function makeCanvasVisibleToScreen(canvas) {
+    // Avoid creating the image when it is already present
+    // Warning: client-specific DOM-traversal
+    if (canvas.nextElementSibling.nextElementSibling && canvas.nextElementSibling.nextElementSibling.tagName === "IMG") {
+      return;
+    }
+
+    // Add invisible replication of canvas contents to source side DOM
+    var imgReplacement = document.createElement("IMG");
+    imgReplacement.className = imgReplacementMarker;
+    imgReplacement.src = canvas.toDataURL("image/png"); // Dump canvas contents to image
+    imgReplacement.style = "display: none"; // Make the image invisible to the source
+    canvas.parentElement.appendChild(imgReplacement); // Add image to the DOM
+
+    var imgStyleForAgent = "display: block";
+
+    // Make the invisible image visible to screen
+    glia.changeElementAttributesForCobrowsing(imgReplacement, function(attributes) {
+      attributes.style = imgStyleForAgent;
+      return attributes;
+    });
+  }
+
+  function mirrorAllCanvases() {
+    // Add the image for all existing canvases
+    var canvases = document.querySelectorAll("my-selector");
+    canvases.forEach(makeCanvasVisibleToScreen);
+
+    // Monitor new canvases and create images
+    var canvasParent = document.querySelector("my-selector-2");
+
+    mutationObserver = new MutationObserver(function() {
+      var newCanvases = document.querySelectorAll("my-selector");
+      newCanvases.forEach(makeCanvasVisibleToScreen);
+    });
+    mutationObserver.observe(canvasParent, {childList: true});
+    return mutationObserver;
+  }
+
+  var previousVisitorStatus;
+  var mutationObserver;
+  glia.addEventListener(glia.EVENTS.VISITOR_STATUS_UPDATE, function(visitorStatus) {
+
+    // Create image mirrors only when "engaged"
+    if (visitorStatus.engaged && (!previousVisitorStatus || !previousVisitorStatus.engaged)) {
+      // Remove all existing image replacement to "refresh" all the canvas images
+      // whenever CoBrowsing restarts.
+      var existingImageReplacements = document.querySelectorAll("img." + imgReplacementMarker);
+      existingImageReplacements.forEach(function(element) {
+        element.parentElement.removeChild(element);
+      });
+
+      mirrorAllCanvases();
+    }
+
+    previousVisitorStatus = visitorStatus;
+  });
+});
+
+    
   </script>
 </body>
 </html>
